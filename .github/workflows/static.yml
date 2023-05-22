@@ -45,11 +45,6 @@ jobs:
         with:
           python-version: '3.x'
           
-      # install python deps
-      - name: Install python Deps
-        if: steps.check_files.outputs.files_exists != 'true'
-        run: pip install beautifulsoup4 
-
       # fix links in html
       - name: Fix links
         if: steps.check_files.outputs.files_exists != 'true'
