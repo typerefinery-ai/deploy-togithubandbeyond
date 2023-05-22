@@ -9,15 +9,16 @@ def update_html_files(folder_path, static_prefix, pattern):
             if file_name.endswith(".html"):
                 file_path = os.path.join(root, file_name)
                 updated_links = update_html_file(file_path, static_prefix, pattern)
-                print(f"File: {file_path}")
-                print("Updated Links:")
-                print("\n".join(updated_links))
-                print()
+                if updated_links:
+                    print(f"File: {file_path}")
+                    print("Updated Links:")
+                    print("\n".join(updated_links))
+                    print()
 
 def update_html_file(file_path, static_prefix, pattern):
     updated_links = []
 
-    with open(file_path, "r+") as file:
+    with open(file_path, "r") as file:
         content = file.read()
         soup = BeautifulSoup(content, "html.parser")
 
@@ -28,9 +29,8 @@ def update_html_file(file_path, static_prefix, pattern):
                     element[attribute] = updated_value
                     updated_links.append(f"Tag: {element.name}\nAttribute: {attribute}\nOriginal: {value}\nUpdated: {updated_value}\n")
 
-        file.seek(0)
+    with open(file_path, "w") as file:
         file.write(str(soup))
-        file.truncate()
 
     return updated_links
 
