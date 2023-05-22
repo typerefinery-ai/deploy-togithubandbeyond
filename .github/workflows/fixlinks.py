@@ -22,9 +22,11 @@ def update_html_file(file_path, static_prefix, pattern):
         content = file.read()
         soup = BeautifulSoup(content, "html.parser")
 
+        regex = re.compile(pattern)
+
         for element in soup.find_all(True):
             for attribute, value in element.attrs.items():
-                if isinstance(value, str) and re.search(pattern, value):
+                if isinstance(value, str) and regex.match(value):
                     updated_value = static_prefix + value
                     element[attribute] = updated_value
                     updated_links.append(f"Tag: {element.name}\nAttribute: {attribute}\nOriginal: {value}\nUpdated: {updated_value}\n")
