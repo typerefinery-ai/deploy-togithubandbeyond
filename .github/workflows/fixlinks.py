@@ -23,27 +23,31 @@ def update_html_file(file_path, static_prefix):
         tags = ["a", "link", "script", "img"]
         for tag in tags:
             elements = soup.find_all(tag, href=True)
+            elements += soup.find_all(tag, src=True)
             for element in elements:
-                href = element["href"]
-                if href.startswith("/assets") or href.startswith("/etc"):
-                    updated_href = static_prefix + href
-                    element["href"] = updated_href
-                    updated_links.append(f"Original: {href}\nUpdated: {updated_href}\n")
+                if "href" in element.attrs:
+                    attr_name = "href"
+                    attr_value = element["href"]
+                else:
+                    attr_name = "src"
+                    attr_value = element["src"]
 
-        css_elements = soup.find_all("link", rel="stylesheet", href=True)
-        for css_element in css_elements:
-            href = css_element["href"]
-            if href.startswith("/assets") or href.startswith("/etc"):
-                updated_href = static_prefix + href
-                css_element["href"] = updated_href
-                updated_links.append(f"Original: {href}\nUpdated: {updated_href}\n")
+                if attr_value.startswith("/assets") or attr_value.startswith("/etc"):
+                    updated_attr_value = static_prefix + attr_value
+                    element[attr_name] = updated_attr_value
+                    updated_links.append(f"Original: {attr_value}\nUpdated: {updated_attr_value}\n")
 
-        font_elements = soup.find_all("style")
-        for font_element in font_elements:
-            if "@font-face" in font_element.string:
-                updated_string = font_element.string.replace("/assets", static_prefix)
-                font_element.string = updated_string
-                updated_links.append("Updated font URLs\n")
+                if tag == "img" and "srcset" in element.attrs:
+                    srcset_values = element["srcset"].split(",")
+                    updated_srcset_values = []
+                    for value in srcset_values:
+                        if value.strip().startswith("/assets") or value.strip().startswith("/etc"):
+                            updated_value = static_prefix + value.strip()
+                            updated_srcset_values.append(updated_value)
+                            updated_links.append(f"Original (srcset): {value.strip()}\nUpdated: {updated_value}\n")
+                        else:
+                            updated_srcset_values.append(value.strip())
+                    element["srcset"] = ", ".join(updated_srcset_values)
 
         file.seek(0)
         file.write(str(soup))
