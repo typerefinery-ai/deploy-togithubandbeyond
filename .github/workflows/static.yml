@@ -31,6 +31,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      # add python
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # fix links in html
+      - name: Fix links
+        run: python .github/workflows/fixlinks.py ${GITHUB_WORKSPACE} ${GITHUB_REPOSITORY#*/}
+        
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
