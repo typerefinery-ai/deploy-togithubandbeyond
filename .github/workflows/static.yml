@@ -31,13 +31,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      # check if CNAME file exists
+      - name: Check if CNAME file exists
+        id: check_cname
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "CNAME"
+
       # add python
       - uses: actions/setup-python@v4
+        if: steps.check_files.outputs.files_exists != 'true'
         with:
           python-version: '3.x'
+          cache: 'pip' # caching pip dependencies
+          
+      # install python deps
+      - name: Install python Deps
+        if: steps.check_files.outputs.files_exists != 'true'
+        run: pip install beautifulsoup4 
 
       # fix links in html
       - name: Fix links
+        if: steps.check_files.outputs.files_exists != 'true'
         run: python .github/workflows/fixlinks.py ${GITHUB_WORKSPACE} ${GITHUB_REPOSITORY#*/}
         
       - name: Setup Pages
